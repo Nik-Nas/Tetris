@@ -1,17 +1,9 @@
-from enum import Enum
-from pyglet.window import Window
 import pyglet.window.key
-from pyglet.graphics import Batch, Group
-from pyglet.shapes import Rectangle, Line
-from pyglet.gui import Slider
 from pyglet import resource
-from pyglet import gui
-from window import CustomWindow, WidgetType
-from gameField import GameField
-from customWidgets import CustomSlider
-from pixelMathTools import *
-from graphicsTools import *
+
 from fieldRasterizer import *
+from window import CustomWindow, WidgetType
+
 
 class GUI:
 
@@ -43,10 +35,10 @@ class GUI:
         self.__fieldRasterizer = FieldRasterizer(self.__field, 60, 60)
         self.__sprites = self.__fieldRasterizer.toImage()
         self.__window.add(*self.__sprites)
-        self.__window.addWidget(WidgetType.SLIDER, "cellSizeSlider", 600, 400, \
-                             resource.image("background.png"), \
-                             resource.image("knob.png"), \
-                             edge=-10)
+        self.__window.addWidget(WidgetType.SLIDER, "cellSizeSlider", 600, 400,
+                                resource.image("Assets/background.png"),
+                                resource.image("Assets/knob.png"),
+                                edge=-10)
         self.__window.push_handlers(self.on_key_press)
         self.__window.getWidget("cellSizeSlider").set_processed_value(60)
         self.__window.getWidget("cellSizeSlider").add_event_handler(self.resize_field)
@@ -68,9 +60,9 @@ class GUI:
         if objects:
             self.__window.add(*objects, windowSized=window_sized)
 
-    def addWidget(self, widgetType, widgetName, x, y, *args, handlers=None, **kwargs):
+    def addWidget(self, widget_type, widget_name, x, y, *args, handlers=None, **kwargs):
         if kwargs or args:
-            self.__window.addWidget(widgetType, widgetName, x, y, *args, envents_handlers=handlers, **kwargs)
+            self.__window.addWidget(widget_type, widget_name, x, y, *args, envents_handlers=handlers, **kwargs)
 
 
 
