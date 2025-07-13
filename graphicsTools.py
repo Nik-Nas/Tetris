@@ -1,92 +1,58 @@
-from enum import Enum
+import enum
 from pyglet.shapes import Rectangle, Line
 from pixelMathTools import *
 
-class OpacityType(Enum):
+
+class OpacityType(enum.Enum):
     SOLID = 0
     CONSTANT = 1
     DATA_MATCH = 2
     COLOR_MATCH = 3
     DEFINE_TRANSPARENT = 4
 
-##def drawGrid(rows, columns, gridWidth, gridHeight, \
-##             marginSize, cellColor, marginColor, marginVisible=True):
-##    ##calculating cells size and coordinates
-##    width, height = getCellSize(gridWidth, gridHeight, rows, columns, marginSize)
-##    cellsPositions = getCellsPositions(gridWidth, gridHeight, rows, columns, marginSize)
-##    sprites = []
-##    ## creating cell sprites
-##    for i, position in enumerate(cellsPositions):
-##        x, y = position
-##        sprites.append(Rectangle(x, y, width, height, color=cellColor))
-##    ## creating margin sprites
-##    if marginVisible:
-##        #if margins are enabled, calculate their positions and add them to the list
-##        vertMarginPositions = getVerticalMarginsCentered(gridHeight, rows, marginSize)
-##        horizMarginPositions = getHorizontalMarginsCentered(gridWidth, columns, marginSize)
-##        for x, y in  horizMarginPositions: #horizontal
-##            sprites.append(Line(x, y, gridWidth, y, thickness=marginSize,\
-##                                color=marginColor))
-##        for x, y in vertMarginPositions: #vertical
-##            sprites.append(Line(x, y, x, gridHeight, thickness=marginSize,\
-##                                color=marginColor))
-##    return sprites
-##
-##
 
-def drawMatrix(matrix, dataColorMatch, gridWidth, gridHeight, \
-               marginSize, marginColor, opacityType=OpacityType.SOLID,\
-               opacityData=None, marginVisible=True):
-    
+def draw_matrix(matrix, data_color_match, grid_width, grid_height, margin_size, margin_color,
+                opacity_type=OpacityType.SOLID, opacity_data=None, margin_visible=True):
     rows = len(matrix)
     columns = len(matrix[0])
-    
+
     ##calculating cells size and coordinates
-    width, height = getCellSize(gridWidth, gridHeight, rows, columns, marginSize)
-    cellsPositions = getCellsPositions(gridWidth, gridHeight, rows, columns, marginSize)
+    width, height = get_cell_size(grid_width, grid_height, rows, columns, margin_size)
+    cells_positions = get_cells_positions(grid_width, grid_height, rows, columns, margin_size)
 
     # preparing empty list and defining opacity function based on opacity type
     sprites = []
-    
-    match opacityType:
+
+    match opacity_type:
         case OpacityType.SOLID:
-            opacity = lambda x: 255
+            opacity = lambda inp: 255
         case OpacityType.CONSTANT:
-            opacity = lambda x: int(opacityData * 255)
+            opacity = lambda inp: int(opacity_data * 255)
         case OpacityType.DATA_MATCH:
-            opacity = lambda x: int(opacityData[x] * 255)
+            opacity = lambda inp: int(opacity_data[inp] * 255)
         case OpacityType.COLOR_MATCH:
-            opacity = lambda x: int(opacityData[dataColorMatch[x]] * 255)
+            opacity = lambda inp: int(opacity_data[data_color_match[inp]] * 255)
         case OpacityType.DEFINE_TRANSPARENT:
-            opacity = lambda x: int((opacityData[x] if x in opacityData else 1) * 255)
-        case _: raise ValueError(f"opacity type is not specified or given value ({opacityType}) does not support")     
-    
-    unpackedMatrix = [value for row in matrix for value in row]
+            opacity = lambda inp: int((opacity_data[inp] if inp in opacity_data else 1) * 255)
+        case _:
+            raise ValueError(f"opacity type is not specified or given value ({opacity_type}) does not support")
+
+    unpacked_matrix = [value for row in matrix for value in row]
     ## creating cell sprites
-    for i, (position, value) in enumerate(zip(cellsPositions, unpackedMatrix)):
+    for i, (position, value) in enumerate(zip(cells_positions, unpacked_matrix)):
         x, y = position
-        rect = Rectangle(x, y, width, height, color=dataColorMatch[value])
+        rect = Rectangle(x, y, width, height, color=data_color_match[value])
         rect.opacity = opacity(value)
         sprites.append(rect)
-    
+
     ## creating margin sprites
-    if marginVisible:
-        #if margins are enabled, calculate their positions and add them to the batch
-        vertMarginPositions = getVerticalMarginsCentered(gridWidth, columns, marginSize)
-        horizMarginPositions = getHorizontalMarginsCentered(gridHeight, rows, marginSize)
+    if margin_visible:
+        # if margins are enabled, calculate their positions and add them to the batch
+        vert_margin_positions = get_vertical_margins_centered(grid_width, columns, margin_size)
+        horiz_margin_positions = get_horizontal_margins_centered(grid_height, rows, margin_size)
 
-        for x, y in  horizMarginPositions: #horizontal
-            sprites.append(Line(x, y, gridWidth, y, thickness=marginSize,\
-                                color=marginColor))
-        for x, y in vertMarginPositions: #vertical
-            sprites.append(Line(x, y, x, gridHeight, thickness=marginSize,\
-                                color=marginColor))
+        for x, y in horiz_margin_positions:  # horizontal
+            sprites.append(Line(x, y, grid_width, y, thickness=margin_size, color=margin_color))
+        for x, y in vert_margin_positions:  # vertical
+            sprites.append(Line(x, y, x, grid_height, thickness=margin_size, color=margin_color))
     return sprites
-    
-
-
-
-
-
-
-            

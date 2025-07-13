@@ -1,5 +1,5 @@
 import pyglet.clock
-import vector2D
+
 
 class PhysicsEngine:
 
@@ -36,15 +36,15 @@ class PhysicsEngine:
 
     def pause(self):
         ##some epic pause actions
-        self._clock.unschedule(update)
-        paused = True
+        self._clock.unschedule(self.update)
+        self._paused = True
 
 
     def resume(self):
         ##some epic resume actions
-        self._clock.schedule_interval(update, self._tick)
-        paused = False
+        self._clock.schedule_interval(self.update, self._tick)
+        self._paused = False
 
     def stop(self):
-        self._clock.schedule_interval(update, self._tick)
+        self._clock.schedule_interval(self.update, self._tick)
         

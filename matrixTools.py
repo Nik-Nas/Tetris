@@ -1,66 +1,66 @@
-def integerToBinaryMatrix(num, rowLength, fillmode=0, stripEmpty=True):
+def int_to_bin_matrix(num, row_length, fillmode=0, strip_empty=True):
     ##fillmode: 0 - place zeros at the start, 1 - place zeros at the end, 2 - no filling
-    binaryView = bin(num)[2:]
-    signs = len(binaryView)
-    if fillmode == 2 and signs % rowLength != 0:
-        raise ValueError(f"number ({num}) doesn't unpack evenly into matrix of specified row length ({rowLength}) without filling")
+    binary_view = bin(num)[2:]
+    signs = len(binary_view)
+    if fillmode == 2 and signs % row_length != 0:
+        raise ValueError(f"number ({num}) doesn't unpack evenly into matrix of specified row length ({row_length}) without filling")
     matrix = []
     match fillmode:
         case 0:
-            binaryView = binaryView.zfill(((signs + rowLength - 1) // rowLength) * rowLength)
+            binary_view = binary_view.zfill(((signs + row_length - 1) // row_length) * row_length)
         case 1:
-            binaryView = binaryView + "0" * (signs % rowLength)
+            binary_view = binary_view + "0" * (signs % row_length)
     index = 0
-    signs = len(binaryView)
-    for i in range(signs // rowLength):
-        matrix.append(list(map(int, binaryView[index: index + rowLength])))
-        index += rowLength
-    empty = [0] * rowLength
+    signs = len(binary_view)
+    for i in range(signs // row_length):
+        matrix.append(list(map(int, binary_view[index: index + row_length])))
+        index += row_length
+    empty = [0] * row_length
     
-    while stripEmpty and empty in matrix:
+    while strip_empty and empty in matrix:
         matrix.remove(empty)
     empty = [0] * len(matrix)
-    matrix = transposeMatrix(matrix)
-    while stripEmpty and (empty) in matrix:
+    matrix = transpose_matrix(matrix)
+    while strip_empty and empty in matrix:
         matrix.remove(empty)
-    matrix = transposeMatrix(matrix)
+    matrix = transpose_matrix(matrix)
     return matrix
         
-def binaryMatrixToInteger(matrix, minLength=None):
-    stringForm = ""
+def bin_matrix_to_int(matrix, min_length=None):
+    string_form = ""
     for row in matrix:
         for num in row:
-            stringForm += str(num)
-    if minLength and len(stringForm) < minLength:
-        stringForm += "0" * (minLength - len(stringForm))
-    return int(stringForm)
+            string_form += str(num)
+    if min_length and len(string_form) < min_length:
+        string_form += "0" * (min_length - len(string_form))
+    return int(string_form)
 
 
-def transposeMatrix(matrix):
-    resultMatrix = []
+def transpose_matrix(matrix):
+    result_matrix = []
     for column in range(len(matrix[0])):
-        newRow = []
+        new_row = []
         for row in range(len(matrix)):
-            newRow.append(matrix[row][column])
-        resultMatrix.append(newRow)
-    return resultMatrix
+            new_row.append(matrix[row][column])
+        result_matrix.append(new_row)
+    return result_matrix
 
     
-def rotateMatrix(matrix, clockwise=True):
-    resultMatrix = []
-    rowStep = 1 if clockwise else -1
-    columnStep = -1 if clockwise else 1
+def rotate_matrix(matrix, clockwise=True):
+    result_matrix = []
+    row_step = 1 if clockwise else -1
+    column_step = -1 if clockwise else 1
     for column in range(len(matrix[0])):
-        newRow = []
+        new_row = []
         for row in range(len(matrix)):
-            newRow.append(matrix[row][column])
-        resultMatrix.append(newRow[::columnStep])
-    return resultMatrix[::rowStep]
+            new_row.append(matrix[row][column])
+        result_matrix.append(new_row[::column_step])
+    return result_matrix[::row_step]
 
-def reverseRows(matrix):
+def reverse_rows(matrix):
     return matrix[::-1]
 
-def reverseColumns(matrix):
+def reverse_columns(matrix):
     return [row[::-1] for row in matrix]
 
 
