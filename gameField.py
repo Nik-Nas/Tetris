@@ -13,100 +13,111 @@ class GameField:
 
     def __init__(self, rows, columns):
         ##dimensions of field (in cells)
-        self.__rows = rows
-        self.__columns = columns
+        self._rows = rows
+        self._columns = columns
         self._matrix = []
         for i in range(rows):
             self._matrix.append([0] * columns)
         self._stationary_matrix = copy(self._matrix)
-        self.__current_piece = None
-        self.__hold_piece = None
-        self.__piece_manager = PieceManager()
+        self._current_piece = None
+        self._hold_piece = None
+        self._piece_manager = PieceManager()
 
-        self.__current_piece = self.__piece_manager.get_next()
-        self.__cur_width = len(self.__current_piece._rotated_matrix[0])
-        self.__cur_height = len(self.__current_piece._rotated_matrix)
-        self.__cur_col = columns // 2 - 1
-        self.__cur_row = rows - self.__cur_height
-        self.update_current(self.__cur_row, self.__cur_col)
+        self._current_piece = self._piece_manager.get_next()
+        self._cur_width = len(self._current_piece.rotated[0])
+        self._cur_height = len(self._current_piece.rotated)
+        self._cur_col = columns // 2 - 1
+        self._cur_row = rows - self._cur_height
+        self.update_current(self._cur_row, self._cur_col)
 
     @property
     def rows(self):
-        return self.__rows
+        return self._rows
 
     @property
     def columns(self):
-        return self.__columns
+        return self._columns
 
     def tick_current(self):
         self.move_current(Vector2dPresets.DOWN)
 
-    def rotate_current(self, is_clockwise=True):
-        if self.__current_piece is not None:
-            self.__current_piece.rotate(is_clockwise)
-            self.__cur_width = len(self.__current_piece._rotated_matrix[0])
-            self.__cur_height = len(self.__current_piece._rotated_matrix)
+    def rotate_current(self, is_clockwise=False):
+        if self._current_piece is None: return False
+        if self.fit(self._cur_row, self._cur_col, Vector2dPresets.DEFAULT, self._current_piece.next_rotation) != 0:
+            return False
+        self._current_piece.rotate(is_clockwise)
+        self._cur_width = len(self._current_piece.rotated[0])
+        self._cur_height = len(self._current_piece.rotated)
+        self.update_current(self._cur_row, self._cur_col)
+        return True
 
-    def move_current(self, direction):
+    def move_current(self, direction) -> bool:
         if not direction: raise ValueError("direction is not specified")
-        old_pos = (self.__cur_row, self.__cur_col)
+        old_pos = (self._cur_row, self._cur_col)
         row, col = old_pos
         match direction:
             case Vector2dPresets.DOWN:
                 row -= 1
             case Vector2dPresets.LEFT:
                 col -= 1
-            case Vector2dPresets.UP:
-                row += 1
             case Vector2dPresets.RIGHT:
                 col += 1
             case _:
                 raise ValueError(f"wtf is going on? Direction {direction} is not supported")
 
-        is_stopped = not (self.fit(row, col))
-        if is_stopped: row, col = old_pos
+        fit_status = self.fit(row, col, direction, rotation=self._current_piece._rotation_index)
+        if fit_status != 0: row, col = old_pos
 
         self.update_current(row, col)
-        if is_stopped:
+        if fit_status == 2:
             self._stationary_matrix = copy(self._matrix)
             self.next_current()
+        return fit_status == 0
 
-    def fit(self, row, col):
-        if self.__current_piece is None: return True
-        if row < 0 or col < 0 or col > self.__columns - self.__cur_width:
-            return False
-        piece = self.__current_piece._rotated_matrix
+    def fit(self, row: int, col: int, direction: Vector2dPresets, rotation:int) -> int:
+        if self._current_piece is None: return 0
+        if row < 0:
+            return 2
+        if col < 0 or col > self._columns - self._cur_width:
+            return 1
+        can_end = direction == Vector2dPresets.DOWN
+        piece = self._current_piece.rotations[rotation]
         try:
             #           for r in self._matrix: print(r)
             for r in range(len(piece)):
                 for c in range(len(piece[0])):
                     if piece[r][c] > 0 and self._stationary_matrix[r + row][c + col] > 0:
-                        return False
-            return True
+                        return 2 if can_end else 1
+            return 0
         except IndexError:
             print("fit index error in gameField fit()")
-            return False
+            return 2
 
     def update_current(self, row, col):
-        self.__cur_row = row
-        self.__cur_col = col
+        self._cur_row = row
+        self._cur_col = col
 
         new_matrix = copy(self._stationary_matrix)
-        for r in range(row, row + self.__cur_height):
-            for c in range(col, col + self.__cur_width):
-                if self.__current_piece._rotated_matrix[r - row][c - col] == 0: continue
-                new_matrix[r][c] = self.__current_piece.code
-
+        r = row
+        c = col
+        try:
+            for r in range(row, row + self._cur_height):
+                for c in range(col, col + self._cur_width):
+                    if self._current_piece.rotated[r - row][c - col] == 0: continue
+                    new_matrix[r][c] = self._current_piece.code
+        except IndexError as e:
+            e.args = *e.args, r, c, row, col
+            raise e
         self._matrix = copy(new_matrix)
 
     def next_current(self):
-        self.__current_piece = self.__piece_manager.get_next()
-        self.__cur_width = len(self.__current_piece._rotated_matrix[0])
-        self.__cur_height = len(self.__current_piece._rotated_matrix)
-        self.__cur_col = self.__columns // 2 - 1
-        self.__cur_row = self.__rows - self.__cur_height
-        self.update_current(self.__cur_row, self.__cur_col)
+        self._current_piece = self._piece_manager.get_next()
+        self._cur_width = len(self._current_piece.rotated[0])
+        self._cur_height = len(self._current_piece.rotated)
+        self._cur_col = self._columns // 2 - 1
+        self._cur_row = self._rows - self._cur_height
+        self.update_current(self._cur_row, self._cur_col)
 
     def log(self):
-        for p in self._matrix[::-1]: print(p)
+        for p in self._current_piece.rotated: print(p)
         print()

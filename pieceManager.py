@@ -18,7 +18,7 @@ class PieceManager:
         self.__repeat_spacer = 2
         self.__used_indexes = {i: -1 for i in range(1, self.__repeat_spacer + 1)}
 
-    def get_next(self):
+    def get_next(self) -> Piece:
         used = self.__used_indexes.values()
         unused_shapes = [self._shapes[i] for i in range(len(self._shapes)) if i not in used]
         index = random.randint(0, len(unused_shapes) - 1)

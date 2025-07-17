@@ -72,8 +72,8 @@ class FieldRasterizer:
     def get_cell(self, x, y):
         offset = 2 if self.__margin >= 4 else 0
         cell = get_cell_by_coordinates(x, y, 0, 0, self.__gridSize[0],
-                                       self.__gridSize[1], self.__field.__rows,
-                                       self.__field.__columns, self.__margin, offset)
+                                       self.__gridSize[1], self.__field._rows,
+                                       self.__field._columns, self.__margin, offset)
         if cell:
             self.__field._matrix[cell[0]][cell[1]] = 1
             if self.__lastCell: self.__field._matrix[self.__lastCell[0]][self.__lastCell[1]] = 0
