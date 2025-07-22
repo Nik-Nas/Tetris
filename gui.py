@@ -1,11 +1,11 @@
 import pyglet.window.key
 
+import vector2D
 from audioManager import AudioManager
 from eventManager import EventManager
-from fieldRasterizer import FieldRasterizer
+from gridRasterizer import GridRasterizer
 from gameField import GameField
 from resourceManager import ResourceManager
-from vector2D import Vector2dPresets
 from window import CustomWindow, WidgetType
 
 
@@ -20,11 +20,11 @@ class GUI:
             case pyglet.window.key.SPACE:
                 moved = self._field.rotate_current()
             case pyglet.window.key.LEFT:
-                moved = self._field.move_current(Vector2dPresets.LEFT)
+                moved = self._field.move_current(vector2D.LEFT)
             case pyglet.window.key.RIGHT:
-                moved = self._field.move_current(Vector2dPresets.RIGHT)
+                moved = self._field.move_current(vector2D.RIGHT)
             case pyglet.window.key.DOWN:
-                moved = self._field.move_current(Vector2dPresets.DOWN)
+                moved = self._field.move_current(vector2D.DOWN)
         if moved: self.update_field()
 
 
@@ -41,20 +41,21 @@ class GUI:
     def __init__(self):
         self._window = CustomWindow(resizable=True, fullscreen=False)
         self._field = GameField(10, 10)
-        self._fieldRasterizer = FieldRasterizer(self._field, 60, 60)
+        self._fieldRasterizer = GridRasterizer(self._field, 50, 50)
         self._resource_manager = ResourceManager("Assets")
         self._audio_manager = AudioManager(self._resource_manager)
+        self._event_manager = EventManager(update_tick=1)
+
         self._sprites = self._fieldRasterizer.to_image()
         self._window.add_obj(*self._sprites)
+
         self._window.add_widget(WidgetType.SLIDER, "cellSizeSlider", 600, 400,
                                 self._resource_manager.image("background"),
                                 self._resource_manager.image("knob"),
                                 edge=-10)
         self._window.push_handlers(self.on_key_press)
-        self._window.get_widget("cellSizeSlider").set_processed_value(60)
+        self._window.get_widget("cellSizeSlider").set_processed_value(50)
         self._window.get_widget("cellSizeSlider").add_event_handler(self.resize_field)
-
-        self._event_manager = EventManager(update_tick=1)
 
         self._event_manager.add_custom_callback(self._field.tick_current)
         self._event_manager.add_custom_callback(self.update_field)

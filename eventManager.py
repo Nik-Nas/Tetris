@@ -1,4 +1,4 @@
-import time
+from time import perf_counter
 from typing import Callable
 
 import pyglet.clock
@@ -36,11 +36,10 @@ class EventManager:
 
     def update(self, dt):
         for callback, args in self._custom_callbacks:
-            if args:
-                callback(args)
-            else: callback()
-
-
+            in_ = perf_counter()
+            callback(*args)
+            out = perf_counter()
+            if out - in_ > 0.008: print(out - in_)
 
     def pause(self):
         ##some epic pause actions
@@ -55,8 +54,8 @@ class EventManager:
     def stop(self):
         self._clock.unschedule(self.update)
 
-    def schedule_once(self, callback: Callable, time: int, *args, **kwargs):
-        self._clock.schedule_once(callback, time, args, kwargs)
+    def schedule_once(self, callback: Callable, delay: int, *args, **kwargs):
+        self._clock.schedule_once(callback, delay, args, kwargs)
 
     def schedule_interval(self, callback: Callable, interval: int, *args, **kwargs):
         self._clock.schedule_interval(callback, interval, args, kwargs)

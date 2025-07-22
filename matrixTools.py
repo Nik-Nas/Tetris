@@ -1,3 +1,6 @@
+from typing import Iterable, List
+
+
 def int_to_bin_matrix(num, row_length, fillmode=0, strip_empty=True):
     ##fillmode: 0 - place zeros at the start, 1 - place zeros at the end, 2 - no filling
     binary_view = bin(num)[2:]
@@ -44,7 +47,6 @@ def transpose_matrix(matrix):
             new_row.append(matrix[row][column])
         result_matrix.append(new_row)
     return result_matrix
-
     
 def rotate_matrix(matrix, clockwise=True):
     result_matrix = []
@@ -57,11 +59,26 @@ def rotate_matrix(matrix, clockwise=True):
         result_matrix.append(new_row[::column_step])
     return result_matrix[::row_step]
 
+def subtract_matrices(mat_1: list[list], mat_2: list[list]) -> list[list]:
+    res = []
+    if len(mat_1) != len(mat_2) or len(mat_1[0]) != len(mat_2[0]):
+        raise ValueError("matrix dimensions aren't equal")
+    for row in range(len(mat_1)):
+        res.append([mat_1[row][i] - mat_2[row][i] for i in range(len(mat_1[row]))])
+    return res
+
+
 def reverse_rows(matrix):
     return matrix[::-1]
 
 def reverse_columns(matrix):
     return [row[::-1] for row in matrix]
+
+def copy(iterable: Iterable):
+    result = []
+    for i in iterable:
+        result.append([item for item in i])
+    return result
 
 
 

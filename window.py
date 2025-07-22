@@ -147,7 +147,7 @@ class CustomWindow(Window):
             return 0
         return 1
 
-    def get_widget(self, name):
+    def get_widget(self, name: str):
         if name and name in self.__widgetDict:
             return self.__widgetDict[name]
         raise KeyError(f"widget {name} not found")

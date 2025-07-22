@@ -1,6 +1,3 @@
-from enum import Enum
-
-
 class Vector2D:
 
     def __init__(self, x, y):
@@ -45,9 +42,8 @@ class Vector2D:
         self.y /= magnitude
 
 
-class Vector2dPresets(Enum):
-    DEFAULT = Vector2D(0, 0)
-    UP = Vector2D(0, 1)
-    DOWN = Vector2D(0, -1)
-    LEFT = Vector2D(-1, 0)
-    RIGHT = Vector2D(1, 0)
+DEFAULT = Vector2D(0, 0)
+UP = Vector2D(0, 1)
+DOWN = Vector2D(0, -1)
+LEFT = Vector2D(-1, 0)
+RIGHT = Vector2D(1, 0)

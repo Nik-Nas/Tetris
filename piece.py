@@ -6,11 +6,14 @@ class Piece:
         self.__base_matrix = matrix
         self._spinning_point = spinning_point
         self.__code = code
-        self._rotation_index = 0
-        self.rotations = [rotate_matrix(self.__base_matrix)]
+        self._width = len(matrix[0])
+        self._height = len(matrix)
+        self._rotations = [self.__base_matrix[:]]
         for i in range(1, 4):
-            self.rotations.append(rotate_matrix(self.rotations[i - 1]))
+            self._rotations.append(rotate_matrix(self._rotations[i - 1]))
         del matrix
+
+        self._rotation_index = 0
 
         row_correction = 0
         col_correction = 0
@@ -29,33 +32,48 @@ class Piece:
     def code(self):
         return self.__code
 
-    def rotate(self, is_clockwise=True):
-        self._rotation_index = self.next_rotation if is_clockwise else self.prev_rotation
-
     @property
-    def rotation(self):
+    def rotation_index(self):
         return self._rotation_index
 
     @property
-    def width(self):
-        return len(self.rotated[0])
+    def rotated(self):
+        return self._rotations[self._rotation_index]
 
     @property
-    def height(self):
-        return len(self.rotated)
+    def width(self) -> int:
+        return self._width
 
     @property
-    def next_rotation(self):
-        return (self._rotation_index + 1) % 4
+    def height(self) -> int:
+        return self._height
 
     @property
-    def prev_rotation(self):
-        return (self._rotation_index + 3) % 4
+    def next_rotation(self) -> list[list[int]]:
+        return self._rotations[(self._rotation_index + 1) % 4]
+
+    @property
+    def prev_rotation(self) -> list[list[int]]:
+        return self._rotations[(self._rotation_index + 3) % 4]
 
     @property
     def base(self):
         return self.__base_matrix
 
-    @property
-    def rotated(self):
-        return self.rotations[self._rotation_index]
+    def get_rotation(self, index: int):
+        return self._rotations[index]
+
+    def rotate(self, is_clockwise=True):
+        # basically cycles rotation index (next index if clockwise otherwise previous index)
+        self._rotation_index = (self._rotation_index + (1 if is_clockwise else 3)) % 4
+        #swaps width and height through pure math
+        self._width += self._height
+        self._height = self._width - self._height
+        self._width -= self._height
+
+
+
+
+    def __getitem__(self, position):
+        # returning number from  a rotation
+        return self._rotations[self._rotation_index][position[0]][position[1]]
