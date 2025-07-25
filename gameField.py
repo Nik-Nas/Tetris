@@ -1,9 +1,9 @@
 from typing import Iterable
 
-import vector2D
+import vector2
 from matrixTools import copy
 from pieceManager import PieceManager
-from vector2D import Vector2D
+from vector2 import Vector2
 
 
 def log(arr: Iterable, message="", step=1):
@@ -49,27 +49,26 @@ class GameField:
         return self._columns
 
     def tick_current(self):
-        self.move_current(vector2D.DOWN)
+        self.move_current(vector2.DOWN)
 
     def rotate_current(self, is_clockwise=False):
         if self._current_piece is None: return False
         matrix = self._current_piece.next_rotation if is_clockwise else self._current_piece.prev_rotation
-        if self.fit(matrix, self._cur_row, self._cur_col, vector2D.DEFAULT) != 0:
+        if self.fit(matrix, self._cur_row, self._cur_col, vector2.DEFAULT) != 0:
             return False
         self._current_piece.rotate(is_clockwise)
         self.update_field(self._cur_row, self._cur_col)
         return True
 
-    def move_current(self, direction) -> bool:
-        if not direction: raise ValueError("direction is not specified")
+    def move_current(self, direction:Vector2) -> bool:
         old_pos = (self._cur_row, self._cur_col)
         row, col = old_pos
         match direction:
-            case vector2D.DOWN:
+            case vector2.DOWN:
                 row -= 1
-            case vector2D.LEFT:
+            case vector2.LEFT:
                 col -= 1
-            case vector2D.RIGHT:
+            case vector2.RIGHT:
                 col += 1
             case _:
                 raise ValueError(f"wtf is going on? Direction {direction} is not supported")
@@ -126,18 +125,18 @@ class GameField:
         return len(full_rows_indexes)
 
 
-    def fit(self, matrix: list[list[int]], row: int, col: int, direction: Vector2D) -> int:
+    def fit(self, matrix: list[list[int]], row: int, col: int, direction: Vector2) -> int:
         if row > self._rows - len(matrix): return 1
         if row < 0:
             return 2
-        if col < 0 or col > self._columns - self._current_piece.width:
+        if col < 0 or col > self._columns - len(matrix[0]):
             return 1
         try:
             #           for r in self._matrix: print(r)
             for r in range(len(matrix)):
                 for c in range(len(matrix[0])):
                     if matrix[r][c] > 0 and self._stationary_matrix[r + row][c + col] > 0:
-                        return 2 if direction == vector2D.DOWN else 1
+                        return 2 if direction == vector2.DOWN else 1
             return 0
         except IndexError:
             print("fit index error in gameField fit()")

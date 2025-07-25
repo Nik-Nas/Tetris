@@ -1,17 +1,23 @@
-from graphicsTools import *
+from graphicsTools import draw_matrix
+from graphicsTools import OpacityType
+from pixelMathTools import grid_size
+from pixelMathTools import margin_on_average
+from pixelMathTools import cell_by_coordinates
 
 
 class GridRasterizer:
 
     def __init__(self, field, cell_width, cell_height, auto_margin=True, margin=None):
         if not auto_margin and margin is None: raise TypeError("margin is not defined and auto-margin is disabled")
-        self._margin_coefficient = 10
+        self._margin_coefficient = 12
         self.__cell_width = cell_width
         self.__cell_height = cell_height
         self.auto_margin = auto_margin
         self.__observers = []
-        if auto_margin: self.__margin = self.calc_margin(cell_width, cell_height)
-        else: self.__margin = margin
+        if auto_margin:
+            self.__margin = self.calc_margin(cell_width, cell_height)
+        else:
+            self.__margin = margin
         self.__field = field
         self.__gridSize = grid_size(self.__field.rows, self.__field.columns,
                                     self.cell_width, self.cell_height, self.__margin)
@@ -20,9 +26,8 @@ class GridRasterizer:
             1: (0, 255, 0),
             2: (255, 255, 0),
             3: (0, 0, 255),
-            }
+        }
         self.__lastCell = None
-
 
     def calc_margin(self, cell_width: int, cell_height: int) -> int:
         return margin_on_average(cell_width, cell_height, self._margin_coefficient)
@@ -32,42 +37,41 @@ class GridRasterizer:
         self.update_grid_size()
 
     @property
-    def cell_width(self): return self.__cell_width
+    def cell_width(self):
+        return self.__cell_width
 
     @cell_width.setter
     def cell_width(self, width: int):
         self.__cell_width = width
         self.update_grid_size()
 
-
     @property
-    def cell_height(self): return self.__cell_height
+    def cell_height(self):
+        return self.__cell_height
 
     @cell_height.setter
     def cell_height(self, height: int):
         self.__cell_height = height
         self.update_grid_size()
 
-
     def update_grid_size(self):
         if self.auto_margin: self.__margin = self.calc_margin(self.__cell_width, self.__cell_height)
         self.__gridSize = grid_size(self.__field.rows, self.__field.columns,
                                     self.__cell_width, self.__cell_height, self.__margin)
 
-
     @property
-    def cell_size(self): return self.__cell_width, self.__cell_height
+    def cell_size(self):
+        return self.__cell_width, self.__cell_height
 
     @cell_size.setter
     def cell_size(self, size: tuple) -> None:
         self.__cell_width, self.__cell_height = size
         self.update_grid_size()
-    
 
     def to_image(self):
         return draw_matrix(self.__field._matrix, self.data_color_match, 0, 0,
                            self.__gridSize[0], self.__gridSize[1], self.__margin, (0, 0, 0),
-                           opacity_type=OpacityType.DEFINE_TRANSPARENT, opacity_data={0:0})
+                           opacity_type=OpacityType.DEFINE_TRANSPARENT, opacity_data={0: 0})
 
     def get_cell(self, x, y):
         offset = 2 if self.__margin >= 4 else 0
@@ -79,6 +83,3 @@ class GridRasterizer:
             if self.__lastCell: self.__field._matrix[self.__lastCell[0]][self.__lastCell[1]] = 0
             self.__lastCell = cell
         return cell
-        
-
-    

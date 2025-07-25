@@ -86,6 +86,13 @@ def draw_diff_matrix(diff_matrix, data_color_match, grid_x, grid_y, grid_width: 
             raise ValueError(f"opacity type is not specified or given value ({opacity_type}) does not support")
 
     unpacked_matrix = [value for row in diff_matrix for value in row]
+
+    for value, i in enumerate(unpacked_matrix):
+        if value == 0: continue
+        x, y = cell_position(grid_x, grid_y, i // rows, i % rows, width, height, margin_size)
+        rect = Rectangle(x, y, width, height, color=data_color_match[value])
+        rect.opacity = opacity(value)
+        sprites.append(rect)
     ## creating cell sprites
     for i, (position, value) in enumerate(zip(cells_positions, unpacked_matrix)):
         x, y = position

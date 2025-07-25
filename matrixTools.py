@@ -1,4 +1,4 @@
-from typing import Iterable, List
+from typing import Iterable
 
 
 def int_to_bin_matrix(num, row_length, fillmode=0, strip_empty=True):

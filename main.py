@@ -1,4 +1,5 @@
 import pyglet
+
 from gui import GUI
 
 if __name__ == "__main__":
