@@ -1,13 +1,13 @@
 import pyglet.window.key
 
-import vector2
-from audioManager import AudioManager
-from eventManager import EventManager
-from gridRasterizer import GridRasterizer
-from gameField import GameField
-from panel import Panel
-from resourceManager import ResourceManager
-from window import CustomWindow, WidgetType
+from tools import vector2
+from tools.audioManager import AudioManager
+from tools.eventManager import EventManager
+from drawing.gridRasterizer import GridRasterizer
+from gameplay.gameField import GameField
+from interface.panel import Panel
+from tools.resourceManager import ResourceManager
+from interface.window import CustomWindow, WidgetType
 
 
 class GUI:

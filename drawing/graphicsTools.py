@@ -1,6 +1,8 @@
 import enum
 from pyglet.shapes import Rectangle, Line
-from pixelMathTools import *
+
+from tools.matrixTools import subtract_matrices
+from tools.pixelMath import *
 
 
 class OpacityType(enum.Enum):
@@ -59,10 +61,12 @@ def draw_matrix(matrix, data_color_match, grid_x, grid_y, grid_width: int, grid_
     return sprites
 
 
-def draw_diff_matrix(diff_matrix, data_color_match, grid_x, grid_y, grid_width: int, grid_height: int, margin_size, margin_color,
-                     opacity_type=OpacityType.SOLID, opacity_data=None, margin_visible=True):
-    rows = len(diff_matrix)
-    columns = len(diff_matrix[0])
+def redraw_matrix(old_matrix, new_matrix, data_color_match, grid_x, grid_y, grid_width: int, grid_height: int,
+                  margin_size, margin_color, opacity_type=OpacityType.SOLID, opacity_data=None, redraw_margin=True):
+    rows = len(new_matrix)
+    columns = len(new_matrix[0])
+
+    diff_matrix = subtract_matrices(new_matrix, old_matrix)
 
     ##calculating cells size and coordinates
     width, height = cell_size(grid_width, grid_height, rows, columns, margin_size)
@@ -86,28 +90,25 @@ def draw_diff_matrix(diff_matrix, data_color_match, grid_x, grid_y, grid_width: 
             raise ValueError(f"opacity type is not specified or given value ({opacity_type}) does not support")
 
     unpacked_matrix = [value for row in diff_matrix for value in row]
-
+    ind = 0
     for value, i in enumerate(unpacked_matrix):
         if value == 0: continue
         x, y = cell_position(grid_x, grid_y, i // rows, i % rows, width, height, margin_size)
         rect = Rectangle(x, y, width, height, color=data_color_match[value])
         rect.opacity = opacity(value)
-        sprites.append(rect)
-    ## creating cell sprites
-    for i, (position, value) in enumerate(zip(cells_positions, unpacked_matrix)):
-        x, y = position
-        rect = Rectangle(x, y, width, height, color=data_color_match[value])
-        rect.opacity = opacity(value)
-        sprites.append(rect)
-
+        sprites.append((rect, i))
+        ind = i
     ## creating margin sprites
-    if margin_visible:
+    if redraw_margin:
+        ind += 1
         # if margins are enabled, calculate their positions and add them to the batch
         vert_margin_positions = vert_margins_position_list(grid_width, columns, margin_size)
         horiz_margin_positions = horiz_margins_positions_list(grid_height, rows, margin_size)
 
         for x, y in horiz_margin_positions:  # horizontal
-            sprites.append(Line(x, y, grid_width, y, thickness=margin_size, color=margin_color))
+            sprites.append((Line(x, y, grid_width, y, thickness=margin_size, color=margin_color), ind))
+            ind += 1
         for x, y in vert_margin_positions:  # vertical
-            sprites.append(Line(x, y, x, grid_height, thickness=margin_size, color=margin_color))
+            sprites.append((Line(x, y, x, grid_height, thickness=margin_size, color=margin_color), ind))
+            ind += 1
     return sprites

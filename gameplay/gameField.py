@@ -1,9 +1,9 @@
 from typing import Iterable
 
-import vector2
-from matrixTools import copy
-from pieceManager import PieceManager
-from vector2 import Vector2
+from tools import vector2
+from tools.matrixTools import copy
+from tools.pieceManager import PieceManager
+from tools.vector2 import Vector2
 
 
 def log(arr: Iterable, message="", step=1):
@@ -126,15 +126,17 @@ class GameField:
 
 
     def fit(self, matrix: list[list[int]], row: int, col: int, direction: Vector2) -> int:
-        if row > self._rows - len(matrix): return 1
+        """checks if matrix fits in game field at given position"""
+        width = len(matrix[0])
+        height = len(matrix)
+        if col < 0 or col > self._columns - width:
+            return 1
         if row < 0:
             return 2
-        if col < 0 or col > self._columns - len(matrix[0]):
-            return 1
+        if row > self._rows - height: return 1
         try:
-            #           for r in self._matrix: print(r)
-            for r in range(len(matrix)):
-                for c in range(len(matrix[0])):
+            for r in range(height):
+                for c in range(width):
                     if matrix[r][c] > 0 and self._stationary_matrix[r + row][c + col] > 0:
                         return 2 if direction == vector2.DOWN else 1
             return 0

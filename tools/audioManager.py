@@ -1,6 +1,6 @@
 from pyglet.media import Player
 
-from resourceManager import ResourceManager
+from tools.resourceManager import ResourceManager
 
 
 class AudioManager:

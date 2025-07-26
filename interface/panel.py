@@ -42,7 +42,7 @@ class Panel:
                     try:
                         child.x2 += self.x
                         child.y2 += self._y
-                    except:
+                    except AttributeError:
                         pass
                     child.x += self.x
                     child.y += self._y
@@ -59,11 +59,14 @@ class Panel:
 
     def __update_positions(self, new_pos:tuple[int, int]):
         for child, relative in zip(self._children, self.relative):
+            # recalc positions if needed
             if relative:
                 try:
+                    #if child has such attributes, update them too
                     child.x2 += self.x
                     child.y2 += self._y
-                except:
+                except AttributeError:
+                    #if it doesn't, we don't care
                     pass
                 child.x += new_pos[0] - self._x
                 child.y += new_pos[1] - self._y

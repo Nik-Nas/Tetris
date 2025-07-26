@@ -1,14 +1,15 @@
 from typing import Iterable
 
 
-def int_to_bin_matrix(num, row_length, fillmode=0, strip_empty=True):
+def int_to_bin_matrix(num, row_length, fill_mode=0, strip_empty=True):
     ##fillmode: 0 - place zeros at the start, 1 - place zeros at the end, 2 - no filling
     binary_view = bin(num)[2:]
     signs = len(binary_view)
-    if fillmode == 2 and signs % row_length != 0:
-        raise ValueError(f"number ({num}) doesn't unpack evenly into matrix of specified row length ({row_length}) without filling")
+    if fill_mode == 2 and signs % row_length != 0:
+        raise ValueError(
+            f"number ({num}) doesn't unpack evenly into matrix of specified row length ({row_length}) without filling")
     matrix = []
-    match fillmode:
+    match fill_mode:
         case 0:
             binary_view = binary_view.zfill(((signs + row_length - 1) // row_length) * row_length)
         case 1:
@@ -19,7 +20,7 @@ def int_to_bin_matrix(num, row_length, fillmode=0, strip_empty=True):
         matrix.append(list(map(int, binary_view[index: index + row_length])))
         index += row_length
     empty = [0] * row_length
-    
+
     while strip_empty and empty in matrix:
         matrix.remove(empty)
     empty = [0] * len(matrix)
@@ -28,7 +29,8 @@ def int_to_bin_matrix(num, row_length, fillmode=0, strip_empty=True):
         matrix.remove(empty)
     matrix = transpose_matrix(matrix)
     return matrix
-        
+
+
 def bin_matrix_to_int(matrix, min_length=None):
     string_form = ""
     for row in matrix:
@@ -47,7 +49,8 @@ def transpose_matrix(matrix):
             new_row.append(matrix[row][column])
         result_matrix.append(new_row)
     return result_matrix
-    
+
+
 def rotate_matrix(matrix, clockwise=True):
     result_matrix = []
     row_step = 1 if clockwise else -1
@@ -59,7 +62,9 @@ def rotate_matrix(matrix, clockwise=True):
         result_matrix.append(new_row[::column_step])
     return result_matrix[::row_step]
 
+
 def subtract_matrices(mat_1: list[list], mat_2: list[list]) -> list[list]:
+    """returns result of subtracting mat_2 from mat_1"""
     res = []
     if len(mat_1) != len(mat_2) or len(mat_1[0]) != len(mat_2[0]):
         raise ValueError("matrix dimensions aren't equal")
@@ -71,21 +76,13 @@ def subtract_matrices(mat_1: list[list], mat_2: list[list]) -> list[list]:
 def reverse_rows(matrix):
     return matrix[::-1]
 
+
 def reverse_columns(matrix):
     return [row[::-1] for row in matrix]
+
 
 def copy(iterable: Iterable):
     result = []
     for i in iterable:
         result.append([item for item in i])
     return result
-
-
-
-
-
-
-
-
-
-                

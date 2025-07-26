@@ -1,8 +1,8 @@
-from graphicsTools import draw_matrix
-from graphicsTools import OpacityType
-from pixelMathTools import grid_size
-from pixelMathTools import margin_on_average
-from pixelMathTools import cell_by_coordinates
+from drawing.graphicsTools import draw_matrix
+from drawing.graphicsTools import OpacityType
+from tools.pixelMath import grid_size
+from tools.pixelMath import margin_on_average
+from tools.pixelMath import cell_by_coordinates
 
 
 class GridRasterizer:

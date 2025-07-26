@@ -1,4 +1,4 @@
-from matrixTools import rotate_matrix
+from tools.matrixTools import rotate_matrix
 
 
 class Piece:
@@ -15,18 +15,18 @@ class Piece:
 
         self._rotation_index = 0
 
-        row_correction = 0
-        col_correction = 0
+        self.row_correction = 0
+        self.col_correction = 0
 
         if spinning_point < 15:
             lines_above = spinning_point // 5
             lines_left = spinning_point - lines_above * 5
 
             row_change = -2 + lines_left - lines_above
-            column_change = lines_left - 2 + lines_above
+            column_change = lines_left - lines_above
 
-            row_correction = 2 - lines_above
-            col_correction = lines_left - 2
+            self.row_correction = 2 - lines_above
+            self.col_correction = lines_left - 2
 
     @property
     def code(self):
@@ -70,6 +70,10 @@ class Piece:
         self._width += self._height
         self._height = self._width - self._height
         self._width -= self._height
+
+    @property
+    def position_correctors(self):
+        return self.row_correction, self.col_correction
 
 
 

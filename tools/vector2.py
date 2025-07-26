@@ -1,16 +1,19 @@
 import math
 
-from point import Point
+from tools.point import Point
 
 
 class Vector2:
 
-    def __init__(self, x, y):
+    def __init__(self, x: float, y: float):
         self.x = x
         self.y = y
 
     @property
     def length(self): return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    @property
+    def squared(self): return self.x ** 2 + self.y ** 2
 
     @property
     def normalized(self):
@@ -39,12 +42,12 @@ class Vector2:
         self.x /= magnitude
         self.y /= magnitude
 
-    def __add__(self, vec:"Vector2"):
+    def __add__(self, vec: "Vector2"):
         return Vector2(self.x + vec.x, self.y + vec.y)
 
     def __radd__(self, vec: "Vector2"): return self.__add__(vec)
 
-    def __sub__(self, vec:"Vector2"):
+    def __sub__(self, vec: "Vector2"):
         return Vector2(self.x - vec.x, self.y - vec.y)
 
     def __rsub__(self, vec: "Vector2"): return self.__sub__(vec)
@@ -64,11 +67,25 @@ class Vector2:
 
     def __len__(self): return math.sqrt(self.x ** 2 + self.y ** 2)
 
+    def __eq__(self, vec: "Vector2"):
+        return self.x == vec.x and self.y == vec.y
+
+
 def lerp(vec_1: Vector2, vec_2: Vector2, alpha: float) -> Vector2:
+    """returns resulting vector of linear interpolation"""
     return (1 - alpha) * vec_1 + alpha * vec_2
+
 
 def from_points(start: Point, end: Point):
     return Vector2(end.x - start.x, end.y - start.y)
+
+
+def to_point(start: Point, vector: Vector2):
+    return Point(start.x + vector.x, start.y + vector.y)
+
+
+def from_tuple(coordinates: tuple[float, float]):
+    return Vector2(coordinates[0], coordinates[1])
 
 
 DEFAULT = Vector2(0, 0)

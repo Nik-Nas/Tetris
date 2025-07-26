@@ -15,7 +15,6 @@ class ResourceManager:
             self.__path = resource_folder_path.replace("\\", "/")
         else:
             self.__path = f"{os.getcwd()}\\{resource_folder_path}".replace("\\", "/")
-
         # creating dictionaries for different types of resources
         self._images = {}
         self._audios = {}
@@ -45,7 +44,7 @@ class ResourceManager:
                     case "sound":
                         self._audios[name] = media.load(f"{self.__path}/{filename}")
                         pass
-        except (ResourceNotFoundException, MediaException):
+        except (ResourceNotFoundException, MediaException, FileNotFoundError):
             #if things gone a little bit piz@ec, make sure developer will be noted
             print("resources not found via path", self.__path)
         del categories
@@ -114,7 +113,7 @@ class CustomPlayer(Player):
     def source(self) -> CustomSource | None: return super()._source
 
     @property
-    def current_track_name(self): return self.source.name
+    def current_track_id(self): return self.source.id
 
     def _set_source(self, new_source: CustomSource | None) -> None: super()._set_source(new_source)
 

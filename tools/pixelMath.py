@@ -22,7 +22,7 @@ def cell_width(grid_width: int, columns: int, margin):
     return ((grid_width - margin) // columns) - margin
 
 
-def cell_height(grid_height, rows, margin):
+def cell_height(grid_height: int, rows, margin):
     return ((grid_height - margin) // rows) - margin
 
 

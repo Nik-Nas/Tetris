@@ -1,7 +1,8 @@
 import struct
 import random
-from piece import Piece
-from matrixTools import *
+import os
+from gameplay.piece import Piece
+from tools.matrixTools import *
 
 
 class PieceManager:

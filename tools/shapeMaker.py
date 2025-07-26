@@ -2,13 +2,14 @@ import struct
 
 
 rawInput = ""
-f = open("shapes.bin", "r+b")
+f = open("../shapes.bin", "r+b")
 changesMade = False
 shapes = []
 addedShapes = []
 
-def getNewPiece():
+def get_new_piece():
     current = ""
+    global rawInput
     try:
         for i in range(2):
             rawInput = input().strip()
@@ -30,14 +31,14 @@ def getNewPiece():
         print("Wrong input! Try again!")
 
 
-def pieceAddition():
+def add_piece():
     print("input pieces shapes in following format: \nXXXX\nXXXX\n")
     print("enter -e to go to main menu at any moment.")
     status = 0
     while status != 1:
-        status = getNewPiece()
+        status = get_new_piece()
 
-def clearList():
+def clear_list():
     shapes.clear()
     f.truncate(0)
     print("list cleared")
@@ -45,7 +46,7 @@ def clearList():
     changesMade = True
 
 
-def applyChanges():
+def apply_changes():
     data = b""
     for num in addedShapes:
         print("adding new stuff")
@@ -54,7 +55,7 @@ def applyChanges():
     f.write(data)
 
 
-def getData():
+def get_data():
     content = f.read()
     if len(content) == 0: return 1
     for i in range(0, len(content), 2):
@@ -63,7 +64,7 @@ def getData():
     return 0
 
 
-def showShapes():
+def show_shapes():
     for shape in shapes:
         num = bin(shape[0])[2:10].zfill(8)
         print(f"{num[:4]}\n{num[4:]}\n")
@@ -74,25 +75,25 @@ def idle():
         print("-a: add a new piece to list")
         print("-c: clear the list of pieces")
         print("-e to exit")
+        global rawInput
         rawInput = input().strip()
         match rawInput:
             case "-a":
-                pieceAddition()
+                add_piece()
             case "-c":
-                clearList()
+                clear_list()
             case "-e":
                 print(changesMade)
                 if changesMade:
-                    applyChanges()
+                    apply_changes()
                 return 1
             case _: print("Unsupported option! Enter a supported command.")
-    return 0
 
 def start():
     print("Greetings at Tetris Shape Editor!")
-    getData()
+    get_data()
     print("current shapes list:")
-    showShapes()
+    show_shapes()
     idle()
     f.close()
 

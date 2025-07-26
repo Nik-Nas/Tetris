@@ -4,8 +4,8 @@ from pyglet import gl, gui
 from pyglet.graphics import Batch, Group
 from pyglet.window import Window
 
-from customWidgets import CustomSlider
-from graphicsTools import *
+from interface.customWidgets import CustomSlider
+from drawing.graphicsTools import *
 
 
 class CustomWindow(Window):
