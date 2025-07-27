@@ -52,7 +52,7 @@ def apply_changes():
         print("adding new stuff")
         data += struct.pack("B", num[0])
         data += struct.pack("B", num[1])
-    f.write(data)
+    if data != b"": f.write(data)
 
 
 def get_data():
@@ -83,7 +83,6 @@ def idle():
             case "-c":
                 clear_list()
             case "-e":
-                print(changesMade)
                 if changesMade:
                     apply_changes()
                 return 1

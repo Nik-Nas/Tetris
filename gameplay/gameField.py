@@ -55,7 +55,14 @@ class GameField:
         if self._current_piece is None: return False
         matrix = self._current_piece.next_rotation if is_clockwise else self._current_piece.prev_rotation
         if self.fit(matrix, self._cur_row, self._cur_col, vector2.DEFAULT) != 0:
+            print("STOP")
             return False
+        #print("raw", self._cur_row, self._cur_col, self._current_piece.width)
+
+        #print("corrected", self._cur_row, self._cur_col)
+        correctors = self._current_piece.position_correctors
+        self._cur_row += correctors[0]
+        self._cur_col += correctors[1]
         self._current_piece.rotate(is_clockwise)
         self.update_field(self._cur_row, self._cur_col)
         return True
@@ -95,7 +102,7 @@ class GameField:
                     if self._current_piece[r - row, c - col] == 0: continue
                     new_matrix[r][c] = self._current_piece.code
         except IndexError as e:
-            e.args = (*e.args, r - row, c - col, row, self._current_piece.width,
+            e.args = (*e.args, r - row, c - col, row, col, self._current_piece.width,
                       self._current_piece.height)
             raise e
         self._matrix = copy(new_matrix)
@@ -129,6 +136,10 @@ class GameField:
         """checks if matrix fits in game field at given position"""
         width = len(matrix[0])
         height = len(matrix)
+        if direction == vector2.DEFAULT:
+            correctors = self._current_piece.position_correctors
+            row += correctors[0]
+            col += correctors[1]
         if col < 0 or col > self._columns - width:
             return 1
         if row < 0:

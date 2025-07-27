@@ -39,7 +39,7 @@ class EventManager:
             in_ = perf_counter()
             callback(*args)
             out = perf_counter()
-            if out - in_ > 0.008: print("slow callback:", out - in_)
+            #if out - in_ > 0.008: print("slow callback:", out - in_)
 
     def pause(self):
         ##some epic pause actions

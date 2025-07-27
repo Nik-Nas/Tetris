@@ -1,6 +1,6 @@
-import struct
 import random
-import os
+import struct
+
 from gameplay.piece import Piece
 from tools.matrixTools import *
 
@@ -20,6 +20,7 @@ class PieceManager:
         self.__used_indexes = {i: -1 for i in range(1, self.__repeat_spacer + 1)}
 
     def get_next(self) -> Piece:
+        return self._shapes[0]
         used = self.__used_indexes.values()
         unused_shapes = [self._shapes[i] for i in range(len(self._shapes)) if i not in used]
         index = random.randint(0, len(unused_shapes) - 1)

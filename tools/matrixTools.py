@@ -86,3 +86,56 @@ def copy(iterable: Iterable):
     for i in iterable:
         result.append([item for item in i])
     return result
+
+def recalc_spin_point(old_spin: int, old_width: int, old_height: int, new_width: int, new_height: int) -> int:
+    vertices_row = old_width + 1
+    vertices_col = old_height + 1
+    if old_spin < vertices_row * vertices_col:
+        lines_above = old_spin // vertices_row
+        lines_left = old_spin - lines_above * vertices_row
+        raw_new_spin = lines_above * (new_width + 1) + lines_left
+        lim = (new_width + 1) * (new_height + 1)
+        return raw_new_spin if raw_new_spin < lim else lim - 1
+    return  old_spin
+
+def get_vertex_spin_point(width, height, lines_above, lines_left, horiz_indexation: bool,
+                          mirrored_horiz=False, mirrored_vert=False):
+    if mirrored_horiz: lines_above = height - lines_above
+    if mirrored_vert: lines_left = width - lines_left
+    if horiz_indexation:
+        return lines_above * (width + 1) + lines_left
+    else:
+        return lines_left * (height + 1) + lines_above
+
+"""def change_indexation_direction(old_spin: int, width: int, height: int, from_horizontal: bool):
+    vertices_row = width + 1
+    vertices_col = height + 1
+    if old_spin < vertices_row * vertices_col:
+        if from_horizontal:
+            lines_above = old_spin // vertices_row
+            lines_left = old_spin - vertices_row * lines_above
+            return lines_left * vertices_col + lines_above
+        else:
+            lines_left = old_spin // vertices_row
+            lines_above = old_spin - vertices_row * lines_left
+            return lines_above * vertices_row + lines_left
+    return old_spin"""
+
+"""def mirror_spin_point(old_spin, width, height, horizontal_indexation: bool, mirror_horizontal=True) -> int:
+    vertices_row = width + 1
+    vertices_col = height + 1
+    if old_spin < vertices_row * vertices_col:
+        print("before", old_spin, end=" ")
+        if not horizontal_indexation:
+            old_spin = change_indexation_direction(old_spin, width, height, False)
+            print("change to", old_spin)
+
+        lines_above = old_spin // vertices_row
+        lines_left = old_spin - lines_above * vertices_row
+        if mirror_horizontal:
+            print("after", vertices_row * (height - lines_above) + lines_left, "left", lines_left, "above", lines_above, "width", width, "height", height)
+            return vertices_row * (height - lines_above) + lines_left
+        else:
+            print("after", vertices_row * lines_above + (width - lines_left), "left", lines_left, "above", lines_above, "width", width, "height", height)
+            return vertices_row * lines_above + (width - lines_left)
+    return old_spin"""
