@@ -45,30 +45,23 @@ class CustomWindow(Window):
 
     def on_draw(self):
         self.clear()
-        self.__windowSizedContent.draw()
-        self.__content.draw()
+        self.__batch.draw()
 
     def on_resize(self, width, height):
         super().on_resize(width, height)
-        for sprite in self.__windowSizedList:
-            sprite.width = width
-            sprite.height = height
 
     def __init__(self, *args, **kwargs):
         if "visible" not in kwargs: kwargs["visible"] = False
         super().__init__(*args, **kwargs)
 
         # creating rendering batch for drawable stuff
-        self.__windowSizedContent = Batch()
-        self.__content = Batch()
-        self.__widgets = Batch()
-        self.__windowSizedList = []
+        self.__batch: Batch = Batch()
         self.__contentList = []
         self.__widgetDict = {}
 
         # create rendering groups to differentiate between foreground and background
-        self.__foreground = Group(order=1)
-        self.__background = Group(order=0)
+        self._layers: dict[int: Group] = {0: Group(order=0), 1: Group(order=1)}
+
         # epic initialization ends here
 
         # epic window setup starts here
@@ -93,31 +86,31 @@ class CustomWindow(Window):
     ##                             resource.image("background.png"), \
     ##                             resource.image("knob.png"), \
     ##                             edge=-10)
+    def add_layer(self) -> int:
+        ind = len(self._layers) + 1
+        self._layers[ind] = Group(order=ind)
+        return ind
+
+    def delete_layer(self, layer: int):
+        if layer not in self._layers: raise ValueError("given layer does not exists")
+
+        self._layers.pop(layer)
 
     def delete_obj(self, *objects):
         if objects:
             for obj in objects:
-                if obj in self.__windowSizedList:
-                    target_list = self.__windowSizedList
-                else:
-                    target_list = self.__contentList
+                target_list = self.__contentList
                 if obj in target_list:
                     target_list.remove(obj)
                     obj.delete()
                 else:
-
                     raise ValueError(f"object {obj} not in the list!")
 
-    def add_obj(self, *objects, window_sized=False):
+    def add_obj(self, *objects, layer: int):
         if objects:
-            if window_sized:
-                target_list = self.__windowSizedList
-                target_batch = self.__windowSizedContent
-                target_group = self.__background
-            else:
-                target_list = self.__contentList
-                target_batch = self.__content
-                target_group = self.__foreground
+            target_list = self.__contentList
+            target_batch = self.__batch
+            target_group = self._layers[layer]
             for obj in objects:
                 target_list.append(obj)
                 obj.batch = target_batch
@@ -130,15 +123,15 @@ class CustomWindow(Window):
             widget = ""
             match widget_type:
                 case WidgetType.PUSH_BUTTON:
-                    widget = gui.PushButton(x, y, *args, **kwargs, batch=self.__content, group=self.__foreground)
+                    widget = gui.PushButton(x, y, *args, **kwargs, batch=self.__batch, group=self._layers[1])
                 case WidgetType.TOGGLE_BUTTON:
-                    widget = gui.ToggleButton(x, y, *args, **kwargs, batch=self.__content, group=self.__foreground)
+                    widget = gui.ToggleButton(x, y, *args, **kwargs, batch=self.__batch, group=self._layers[1])
                 case WidgetType.SLIDER:
-                    widget = CustomSlider(10, 100, x, y, *args, **kwargs, batch=self.__content,
-                                          group=self.__foreground)
+                    widget = CustomSlider(10, 100, x, y, *args, **kwargs,
+                                          batch=self.__batch, group=self._layers[1])
                     widget.set_handler("on_change", widget.on_change)
                 case WidgetType.TEXT_ENTRY:
-                    widget = gui.TextEntry(x, y, *args, **kwargs, batch=self.__content, group=self.__foreground)
+                    widget = gui.TextEntry(x, y, *args, **kwargs, batch=self.__batch, group=self._layers[1])
             if events_handlers is not None:
                 for handler in events_handlers.items():
                     widget.set_handler(handler[0], handler[1])

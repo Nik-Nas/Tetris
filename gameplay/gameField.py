@@ -1,5 +1,7 @@
 from typing import Iterable
 
+from pyglet.event import EventDispatcher
+
 from tools import vector2
 from tools.matrixTools import copy
 from tools.pieceManager import PieceManager
@@ -12,7 +14,7 @@ def log(arr: Iterable, message="", step=1):
     print()
 
 
-class GameField:
+class GameField(EventDispatcher):
 
     def __init__(self, rows, columns):
         ##dimensions of field (in cells)
@@ -26,16 +28,19 @@ class GameField:
 
         #matrix with stationary blocks only
         self._stationary_matrix = copy(self._matrix)
+        self.register_event_type("on_game_over")
 
         #current and hold pieces
         self._current_piece = None
         self._hold_piece = None
         self._next_piece = None
+        self.score = 0
 
         #piece manager to get next
         self._piece_manager = PieceManager()
 
         self._current_piece = self._piece_manager.get_next()
+        self._next_piece = self._piece_manager.get_next()
         self._cur_col = columns // 2 - (self._current_piece.width // 2)
         self._cur_row = rows - self._current_piece.height
         self.update_field(self._cur_row, self._cur_col)
@@ -72,6 +77,17 @@ class GameField:
         self.update_field(self._cur_row, self._cur_col)
         return True
 
+    def hard_drop(self):
+        for new_row in range(self._cur_row, -2, -1):
+            if self.fit(self._current_piece.matrix, new_row, self._cur_col, direction=vector2.DOWN) != 2:
+                continue
+
+            self.update_field(new_row + 1, self._cur_col)
+            self.place_piece(new_row + 1)
+            return True
+        raise RuntimeError("hard drop haven't work")
+
+
     def move_current(self, direction:Vector2) -> bool:
         old_pos = (self._cur_row, self._cur_col)
         row, col = old_pos
@@ -88,10 +104,7 @@ class GameField:
         if fit_status != 0: row, col = old_pos
 
         self.update_field(row, col)
-        if fit_status == 2:
-            self.delete_full_rows(row)
-            self._stationary_matrix = copy(self._matrix)
-            self.next_current()
+        if fit_status == 2: self.place_piece(row)
         return fit_status != 1
 
     def update_field(self, row, col):
@@ -107,16 +120,25 @@ class GameField:
                     if self._current_piece[r - row, c - col] == 0: continue
                     new_matrix[r][c] = self._current_piece.code
         except IndexError as e:
-            e.args = (*e.args, r - row, c - col, row, col, self._current_piece.width,
-                      self._current_piece.height)
+            e.args = (*e.args, r - row, c - col, row, col, self._current_piece.width, self._current_piece.height)
             raise e
         self._matrix = copy(new_matrix)
 
-    def next_current(self):
+    def place_piece(self, row: int) -> None:
+        lines_cleared = self.delete_full_rows(row)
+        if lines_cleared == 0:
+            self.score += 8
+        else:
+            self.score += lines_cleared**2 * 100
+        self._stationary_matrix = copy(self._matrix)
+
         del  self._current_piece
-        self._current_piece = self._piece_manager.get_next()
+        self._current_piece = self._next_piece
+        self._next_piece = self._piece_manager.get_next()
         self._cur_col = self._columns // 2 - (self._current_piece.width // 2)
         self._cur_row = self._rows - self._current_piece.height
+        if self.fit(self._current_piece.matrix, self._cur_row, self._cur_col, vector2.DOWN) != 0:
+            self.dispatch_event("on_game_over")
         self.update_field(self._cur_row, self._cur_col)
 
 
