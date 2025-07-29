@@ -1,5 +1,7 @@
 from drawing.graphicsTools import draw_matrix
 from drawing.graphicsTools import OpacityType
+from gameplay import gameField
+from gameplay.gameField import GameField
 from tools.pixelMath import grid_size
 from tools.pixelMath import margin_on_average
 from tools.pixelMath import cell_by_coordinates
@@ -26,6 +28,8 @@ class GridRasterizer:
             1: (0, 255, 0),
             2: (255, 255, 0),
             3: (0, 0, 255),
+            4: (174, 0, 174),
+            5: (255, 0, 0)
         }
         self.__lastCell = None
 

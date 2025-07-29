@@ -43,24 +43,17 @@ class GUI:
 
     def __init__(self):
         self._window = CustomWindow(resizable=True, fullscreen=False)
-        self._field = GameField(20, 20)
-        self._fieldRasterizer = GridRasterizer(self._field, 40, 40)
+        self._field = GameField(20, 10)
+        self._fieldRasterizer = GridRasterizer(self._field, 30, 30)
         self._resource_manager = ResourceManager("Assets")
         self._audio_manager = AudioManager(self._resource_manager)
-        self._event_manager = EventManager(update_tick=5)
+        self._event_manager = EventManager(update_tick=1)
 
         self._sprites = self._fieldRasterizer.to_image()
         self._panel = Panel(200, 50)
         self._panel.add(*self._sprites, relative_position=True)
         self._window.add_obj(*self._panel.children)
-
-        self._window.add_widget(WidgetType.SLIDER, "cellSizeSlider", 700, 400,
-                                self._resource_manager.image("background"),
-                                self._resource_manager.image("knob"),
-                                edge=-10)
         self._window.push_handlers(self.on_key_press)
-        self._window.get_widget("cellSizeSlider").set_processed_value(50)
-        self._window.get_widget("cellSizeSlider").add_event_handler(self.resize_field)
 
         self._event_manager.add_custom_callback(self._field.tick_current)
         self._event_manager.add_custom_callback(self.update_field)
@@ -68,6 +61,8 @@ class GUI:
         self._event_manager.start()
         ##window show up
         self._window.set_visible()
+        self._audio_manager.play_track("main_game_theme", volume=20)
+        self._audio_manager.play_track("main_game_theme", volume=20)
 
     def delete_obj(self, *objects):
         self._window.delete_obj(*objects)

@@ -1,4 +1,4 @@
-from tools.matrixTools import rotate_matrix, recalc_spin_point, get_vertex_spin_point
+from tools.matrixTools import rotate_matrix, recalc_spin_point, get_vertex_spin_point, get_cell_spin_point
 
 
 class Piece:
@@ -8,10 +8,10 @@ class Piece:
         self.__code = code
         self._width = len(matrix[0])
         self._height = len(matrix)
-        self._spinpoint = recalc_spin_point(spinpoint, 4, 2, self._width, self._height)
-        self._rotations = [self._base_matrix[:]]
+        self._spinpoint = recalc_spin_point(spinpoint, 4, 2, self._width, self._height, True)
+        self._rotations = [rotate_matrix(rotate_matrix(self._base_matrix[:]))]
         for i in range(1, 4):
-            self._rotations.append(rotate_matrix(self._rotations[i - 1]))
+            self._rotations.append(rotate_matrix(self._rotations[i - 1], clockwise=False))
         del matrix
 
         self._rotation_index = 0
@@ -25,11 +25,7 @@ class Piece:
         return self.__code
 
     @property
-    def rotation_index(self):
-        return self._rotation_index
-
-    @property
-    def rotated(self):
+    def matrix(self):
         return self._rotations[self._rotation_index]
 
     @property
@@ -41,11 +37,11 @@ class Piece:
         return self._height
 
     @property
-    def next_rotation(self) -> list[list[int]]:
+    def rotated_clockwise(self):
         return self._rotations[(self._rotation_index + 1) % 4]
 
     @property
-    def prev_rotation(self) -> list[list[int]]:
+    def rotated_counterclockwise(self):
         return self._rotations[(self._rotation_index + 3) % 4]
 
     @property
@@ -70,31 +66,49 @@ class Piece:
         #print("new corrections", self._row_correction, self._col_correction)
 
     def __update_correctors(self, index: int, clockwise: bool):
-        vertices_row = self._width + 1
-        vertices_col = self._height + 1
-        if self._spinpoint < vertices_row * vertices_col:
-            lines_above = self._spinpoint // vertices_row
-            lines_left = self._spinpoint - lines_above * vertices_row
+        vertices_in_row = self._width + 1
+        vertices_in_col = self._height + 1
+        if self._spinpoint < vertices_in_row * vertices_in_col:
 
-            del vertices_row, vertices_col
+            lines_above = self._spinpoint // vertices_in_row
+            lines_below = self._height - lines_above
+            lines_left = self._spinpoint - lines_above * vertices_in_row
+            lines_right = self._width - lines_left
 
-            if not clockwise:
-                self._row_correction = self._height - lines_above - lines_left
-                self._col_correction = lines_left - lines_above
-                horiz_mirror = True
-                vert_mirror = False
+            del vertices_in_row, vertices_in_col
+
+            if clockwise:
+                self._row_correction = lines_below - lines_right
+                self._col_correction = lines_left - lines_below
+                arg_1 = lines_left
+                arg_2 = lines_below
             else:
-                self._row_correction = lines_left - self._width + self._height - lines_above
-                self._col_correction = lines_left + lines_above - self._height
-                vert_mirror = True
-                horiz_mirror = False
+                self._row_correction = lines_below - lines_left
+                self._col_correction = lines_left - lines_above
+                arg_1 = lines_right
+                arg_2 = lines_above
             # print("bef", self._spinpoint, end=" ")
-            self._spinpoint = get_vertex_spin_point(self._height, self._width,
-                                                    lines_left, lines_above,
-                                                    horiz_indexation=True,
-                                                    mirrored_horiz=horiz_mirror, mirrored_vert=vert_mirror)
+            self._spinpoint = get_vertex_spin_point(self._height, self._width, arg_1, arg_2, horiz_indexation=True)
 
-            del vert_mirror, horiz_mirror, lines_above, lines_left
+            del lines_above, lines_left, lines_below, lines_right
+        else:
+            block_spin = self._spinpoint - vertices_in_row * vertices_in_col
+            rows_above = block_spin // self._width
+            columns_left = block_spin - rows_above * self._width
+            columns_right = self._width - columns_left - 1
+            rows_below = self._height - rows_above - 1
+            if clockwise:
+                self._row_correction = rows_below - columns_right
+                self._col_correction = columns_left - rows_below
+                arg_1 = columns_left
+                arg_2 = rows_below
+            else:
+                self._row_correction = rows_below - columns_left
+                self._col_correction = columns_left - rows_above
+                arg_1 = columns_right
+                arg_2 = rows_above
+            self._spinpoint = get_cell_spin_point(self._height, self._width, arg_1, arg_2, horiz_indexation=True,
+                                                  pre_inex_vertices=True)
 
     @property
     def position_correctors(self):

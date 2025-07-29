@@ -10,6 +10,7 @@ class AudioManager:
         self._tracks = {}
         self._fxs = {}
         self._players = {0: Player()}
+        self._playing_tracks = {}
         self._limit = 100
         self._last_player_id = 0
         audios = resource_manager.audios
@@ -44,13 +45,19 @@ class AudioManager:
         player.volume = volume / 100
         player.queue(self._tracks[name])
         player.play()
+        self._playing_tracks[name] = player_id
+
+        @player.event("on_player_next_source")
+        def on_player_next_source():
+            print(self._playing_tracks)
+            self._playing_tracks.pop(name)
 
 
     def pause_track(self, name: str):
         if name is None: raise ValueError("name of track could not be None")
         if name not in self._tracks: raise ValueError(f"track with name {name} does not exists")
 
-        player_id = self._tracks[name].player_id
+        player_id = self._playing_tracks[name]
         if player_id >= 0:
             player = self._players[player_id]
             player.pause()

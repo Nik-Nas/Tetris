@@ -51,11 +51,15 @@ class GameField:
     def tick_current(self):
         self.move_current(vector2.DOWN)
 
-    def rotate_current(self, is_clockwise=False):
-        if self._current_piece is None: return False
-        matrix = self._current_piece.next_rotation if is_clockwise else self._current_piece.prev_rotation
+    def rotate_current(self, clockwise=True) -> bool:
+        if self._current_piece is None: raise ValueError("self._current_piece is None")
+
+        if clockwise:
+            matrix = self._current_piece.rotated_clockwise
+        else:
+            matrix = self._current_piece.rotated_counterclockwise
+
         if self.fit(matrix, self._cur_row, self._cur_col, vector2.DEFAULT) != 0:
-            print("STOP")
             return False
         #print("raw", self._cur_row, self._cur_col, self._current_piece.width)
 
@@ -63,7 +67,8 @@ class GameField:
         correctors = self._current_piece.position_correctors
         self._cur_row += correctors[0]
         self._cur_col += correctors[1]
-        self._current_piece.rotate(is_clockwise)
+
+        self._current_piece.rotate(clockwise)
         self.update_field(self._cur_row, self._cur_col)
         return True
 
@@ -79,7 +84,7 @@ class GameField:
                 col += 1
             case _:
                 raise ValueError(f"wtf is going on? Direction {direction} is not supported")
-        fit_status = self.fit(self._current_piece.rotated, row, col, direction)
+        fit_status = self.fit(self._current_piece.matrix, row, col, direction)
         if fit_status != 0: row, col = old_pos
 
         self.update_field(row, col)
@@ -108,8 +113,9 @@ class GameField:
         self._matrix = copy(new_matrix)
 
     def next_current(self):
+        del  self._current_piece
         self._current_piece = self._piece_manager.get_next()
-        self._cur_col = self._columns // 2 - 1
+        self._cur_col = self._columns // 2 - (self._current_piece.width // 2)
         self._cur_row = self._rows - self._current_piece.height
         self.update_field(self._cur_row, self._cur_col)
 
@@ -123,10 +129,7 @@ class GameField:
             if all(num != 0 for num in self._matrix[row]):
                 full_rows_indexes.append(row)
         if len(full_rows_indexes) > 0:
-            new_matrix = []
-            for i in range(1, len(full_rows_indexes)):
-                new_matrix += self._matrix[full_rows_indexes[i - 1] + 1:full_rows_indexes[i]]
-            new_matrix += self._matrix[full_rows_indexes[-1] + 1:self._rows]
+            new_matrix = [self._matrix[row] for row in range(self._rows) if row not in full_rows_indexes]
             for i in range(len(full_rows_indexes)): new_matrix.append([0] * self._columns)
             self._matrix = new_matrix
         return len(full_rows_indexes)
